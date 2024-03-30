@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 
 add_subdirectory(lua)
+add_subdirectory(imgui)
 add_subdirectory(src)
 add_compile_options(-Wall
         -O3

@@ -1,15 +1,17 @@
-#include "lang/lang.h"
+#include "gl/gl.h"
+#include "runtime/lang.h"
 #include <iostream>
 
 int main(int argc, char* argv[])
 {
-    lang::Lua& l = lang::Lua::instance();
+    lua::Runtime& l = lua::Runtime::instance();
     std::cout << l << std::endl;
     std::cout << "alive ";
     for (int i = 0; i < argc; i++) {
         std::cout << argv[i];
     }
     std::cout << std::endl;
-    l.loop();
+    gl::setup();
+    l.shell();
     return 0;
 }

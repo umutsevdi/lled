@@ -1,5 +1,5 @@
-#include "gl/gl.h"
-#include "runtime/lang.h"
+#include "runtime/lua.h"
+#include "wm/display.h"
 #include <iostream>
 
 int main(int argc, char* argv[])

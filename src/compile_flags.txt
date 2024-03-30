@@ -1,0 +1,8 @@
+-xc++-header
+-Wall
+-Wextra
+-I
+./
+-I
+../lua/
+-lua

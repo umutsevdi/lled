@@ -1,6 +1,7 @@
 #include "runtime/lua.h"
 #include "wm/display.h"
 #include <iostream>
+#include <thread>
 
 int main(int argc, char* argv[])
 {
@@ -11,7 +12,7 @@ int main(int argc, char* argv[])
         std::cout << argv[i];
     }
     std::cout << std::endl;
-    gl::setup();
+    std::thread t([]() { gl::setup(); });
     l.shell();
     return 0;
 }

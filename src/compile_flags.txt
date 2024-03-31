@@ -5,4 +5,8 @@
 ./
 -I
 ../lua/
+-I
+../imgui/
+-I
+../imgui/backends/
 -lua

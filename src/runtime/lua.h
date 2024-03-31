@@ -10,6 +10,7 @@
 
 *****************************************************************************/
 #include <iostream>
+#include <sstream>
 #include <vector>
 namespace lled
 {
@@ -49,7 +50,7 @@ class Lua {
      * @log - whether to print error messages to stderr
      * @return error code
      */
-    Status exec_statement(std::string& statement, bool log = false);
+    Status exec(std::string& statement, bool log = false);
 
     /**
      * Executes the given list of statements and returns an error code if there
@@ -58,14 +59,13 @@ class Lua {
      * @log - whether to print error messages to stderr
      * @return error code
      */
-    Status exec_statement(std::vector<std::string>& statement,
-                          bool log = false);
+    Status exec(std::vector<std::string>& statement, bool log = false);
 
     Lua& operator=(Lua&&) = default;
-    Lua& operator=(const Lua&) = default;
+    Lua& operator=(const Lua&) = delete;
     friend std::ostream& operator<<(std::ostream& s, const Lua& l)
     {
-        s << l.instance().version();
+        s << "Lua " << l.instance().version();
         return s;
     }
 

@@ -59,7 +59,7 @@ lled::WindowManager::WindowManager()
     if (!ctx_loaded) { _initialize_backend(); }
     // Create window with graphics context
     window =
-        glfwCreateWindow(960, 720, "My ImGUI Test Window", nullptr, nullptr);
+        glfwCreateWindow(960, 720, "lled", nullptr, nullptr);
     if (window == nullptr) { throw "GLFW couldn't create window"; }
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);// Enable vsync

@@ -19,11 +19,18 @@ class Editor {
     Editor& operator=(Editor&&) = default;
     Editor& operator=(const Editor&) = default;
 
+    struct {
+        bool active;
+        size_t begin;
+        size_t end;
+    } selection;
+
    private:
     Editor();
     ~Editor();
 
     char buffer[2048];
+    bool show_output = true;
     lled::Status result = {};
 };
 

@@ -11,6 +11,46 @@ extern "C" {
 }
 
 lua_State* _state;
+std::stringstream _output;
+
+int _io_write(lua_State* L)
+{
+    int n = lua_gettop(L);
+    for (int i = 1; i <= n; i++) {
+        const char* s = luaL_checkstring(L, i);
+        if (s == NULL)
+            return luaL_error(L, "argument to 'output' must be a string");
+        _output << s << std::endl;
+        printf("%s", s);// Print argument
+    }
+
+    return 0;
+}
+
+int _print(lua_State* L)
+{
+    int n = lua_gettop(L);
+    for (int i = 1; i <= n; i++) {
+        const char* s = luaL_checkstring(L, i);
+        if (s == NULL)
+            return luaL_error(L, "argument to 'output' must be a string");
+        _output << s << std::endl;
+        printf("%s\n", s);// Print argument
+    }
+
+    return 0;
+}
+
+void override_io_write()
+{
+    lua_getglobal(_state, "io");
+    lua_pushcfunction(_state, _io_write);
+    lua_setfield(_state, -2, "write");
+    lua_register(_state, "print", _print);
+
+    luaL_dostring(_state, "io.write('Lua runtime is enabled')");
+    luaL_dostring(_state, "print('Lua runtime is enabled')");
+}
 
 /* Returns the number of occurrences of the needle within the line */
 int _count(const std::string& line, const std::string& needle);
@@ -27,6 +67,7 @@ lled::Lua::Lua()
 {
     _state = luaL_newstate();
     luaL_openlibs(_state);
+    override_io_write();
 }
 
 lled::Lua::~Lua() { lua_close(_state); }
@@ -57,7 +98,7 @@ void lled::Lua::shell()
             syntax_stack += _count_stack(line);
         }
         if (!syntax_stack) {
-            Status s = exec_statement(buffer, true);
+            Status s = exec(buffer, true);
             if (!s.ok) {
                 std::cerr << s.msg << std::endl;
             } else {
@@ -69,7 +110,7 @@ void lled::Lua::shell()
     std::cout << "Lua runtime exited" << std::endl;
 }
 
-lled::Status lled::Lua::exec_statement(std::string& statement, bool log)
+lled::Status lled::Lua::exec(std::string& statement, bool log)
 {
     int err = luaL_loadbuffer(_state, statement.c_str(), statement.length(), "")
               || lua_pcall(_state, 0, 0, 0);
@@ -79,22 +120,16 @@ lled::Status lled::Lua::exec_statement(std::string& statement, bool log)
         if (log) { std::cerr << code << std::endl; }
         return lled::Status(err, code);
     }
-
-    int nresults = lua_gettop(_state);
-    std::stringstream s;
-    for (int i = 1; i <= nresults; ++i) {
-        const char* r = lua_tostring(_state, i);
-        if (r != nullptr) { s << r << std::endl; }
-    }
-    return Status(0, s.str());
+    std::string output = _output.str();
+    _output.flush();
+    return Status(0, output);
 }
 
-lled::Status lled::Lua::exec_statement(std::vector<std::string>& statement,
-                                       bool log)
+lled::Status lled::Lua::exec(std::vector<std::string>& statement, bool log)
 {
     std::string st =
         std::accumulate(statement.begin(), statement.end(), std::string());
-    return exec_statement(st, log);
+    return exec(st, log);
 }
 
 int _count(const std::string& line, const std::string& needle)

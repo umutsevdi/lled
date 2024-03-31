@@ -1,4 +1,5 @@
 #include "wm/display.h"
+#include "wm/editor.h"
 
 #include <iostream>
 #define GL_SILENCE_DEPRECATION
@@ -14,6 +15,8 @@
 bool ctx_loaded = false;
 GLFWwindow* window;
 std::string glsl_version;
+
+bool lled::is_ready() { return ctx_loaded; }
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -51,12 +54,12 @@ int _initialize_backend()
     return 0;
 }
 
-gl::WindowManager::WindowManager()
+lled::WindowManager::WindowManager()
 {
     if (!ctx_loaded) { _initialize_backend(); }
     // Create window with graphics context
     window =
-        glfwCreateWindow(480, 360, "My ImGUI Test Window", nullptr, nullptr);
+        glfwCreateWindow(960, 720, "My ImGUI Test Window", nullptr, nullptr);
     if (window == nullptr) { throw "GLFW couldn't create window"; }
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);// Enable vsync
@@ -80,7 +83,7 @@ gl::WindowManager::WindowManager()
     bool show_demo_window = true;
     bool show_another_window = true;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
+    lled::Editor& editor = lled::Editor::instance();
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
         // Start the Dear ImGui frame
@@ -112,6 +115,7 @@ gl::WindowManager::WindowManager()
             if (ImGui::Button("Close Me")) show_another_window = false;
             ImGui::End();
         }
+        editor.context();
         // Rendering
         ImGui::Render();
         int display_w, display_h;
@@ -127,7 +131,7 @@ gl::WindowManager::WindowManager()
     }
 }
 
-gl::WindowManager::~WindowManager()
+lled::WindowManager::~WindowManager()
 {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -136,7 +140,7 @@ gl::WindowManager::~WindowManager()
     glfwDestroyWindow(window);
     glfwTerminate();
 }
-gl::WindowManager& gl::WindowManager::instance()
+lled::WindowManager& lled::WindowManager::instance()
 {
     static WindowManager instance;
     return instance;

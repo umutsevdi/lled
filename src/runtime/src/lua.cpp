@@ -1,5 +1,6 @@
 #include "runtime/lua.h"
 #include <numeric>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -11,39 +12,34 @@ extern "C" {
 
 lua_State* _state;
 
-/**
- * Executes given text block
- * @state - lua state
- * @block - text block
- * @return - error code
- */
-int _interpret_statement(lua_State* state, std::string block);
+/* Returns the number of occurrences of the needle within the line */
+int _count(const std::string& line, const std::string& needle);
 
 /**
- * Counts the indentation modifying changing tokens within the
- * given line, returns the stack indentation.
+ * Calculates the absolute indentation by counting tokens within the given line,
+ * returns it.
  * @line - to count
  * @return - indentation count
  */
-int count_stack(std::string& line);
+int _count_stack(std::string& line);
 
-lua::Runtime::Runtime()
+lled::Lua::Lua()
 {
     _state = luaL_newstate();
     luaL_openlibs(_state);
 }
 
-lua::Runtime::~Runtime() { lua_close(_state); }
+lled::Lua::~Lua() { lua_close(_state); }
 
-lua::Runtime& lua::Runtime::instance()
+lled::Lua& lled::Lua::instance()
 {
-    static Runtime instance;
+    static Lua instance;
     return instance;
 }
 
-int lua::Runtime::version() { return lua_version(_state); }
+int lled::Lua::version() { return lua_version(_state); }
 
-void lua::Runtime::shell()
+void lled::Lua::shell()
 {
     int syntax_stack = 0;
     std::string line;
@@ -58,28 +54,47 @@ void lua::Runtime::shell()
             break;
         } else {
             buffer.push_back(line + "\n");
-            syntax_stack += count_stack(line);
+            syntax_stack += _count_stack(line);
         }
         if (!syntax_stack) {
-            std::cout << "Executing" << std::endl;
-            _interpret_statement(
-                _state,
-                std::accumulate(buffer.begin(), buffer.end(), std::string()));
+            Status s = exec_statement(buffer, true);
+            if (!s.ok) {
+                std::cerr << s.msg << std::endl;
+            } else {
+                std::cout << s.msg << std::endl;
+            }
             buffer.clear();
         }
     }
     std::cout << "Lua runtime exited" << std::endl;
 }
 
-int _interpret_statement(lua_State* state, std::string block)
+lled::Status lled::Lua::exec_statement(std::string& statement, bool log)
 {
-    int error = luaL_loadbuffer(state, block.c_str(), block.length(), "line")
-                || lua_pcall(state, 0, 0, 0);
-    if (error) {
-        std::cerr << lua_tostring(state, -1) << std::endl;
-        lua_pop(state, 1); /* pop error message from the stack */
+    int err = luaL_loadbuffer(_state, statement.c_str(), statement.length(), "")
+              || lua_pcall(_state, 0, 0, 0);
+    if (err) {
+        std::string code = lua_tostring(_state, -1);
+        lua_pop(_state, 1);
+        if (log) { std::cerr << code << std::endl; }
+        return lled::Status(err, code);
     }
-    return error;
+
+    int nresults = lua_gettop(_state);
+    std::stringstream s;
+    for (int i = 1; i <= nresults; ++i) {
+        const char* r = lua_tostring(_state, i);
+        if (r != nullptr) { s << r << std::endl; }
+    }
+    return Status(0, s.str());
+}
+
+lled::Status lled::Lua::exec_statement(std::vector<std::string>& statement,
+                                       bool log)
+{
+    std::string st =
+        std::accumulate(statement.begin(), statement.end(), std::string());
+    return exec_statement(st, log);
 }
 
 int _count(const std::string& line, const std::string& needle)
@@ -93,12 +108,11 @@ int _count(const std::string& line, const std::string& needle)
     return n;
 }
 
-int count_stack(std::string& line)
+int _count_stack(std::string& line)
 {
-    int stack = 0;
-    stack += _count(line, "function");// do is a block indentation in Lua
-    stack += _count(line, "do");      // do is a block indentation in Lua
-    stack += _count(line, "then");    // then is a block indentation in Lua
+    int stack = _count(line, "function");// do is a block indentation in Lua
+    stack += _count(line, "do");         // do is a block indentation in Lua
+    stack += _count(line, "then");       // then is a block indentation in Lua
     stack -= _count(line, "elseif");// except for when then is used with elseif
     stack -= _count(line, "end");   // end closes blocks in Lua
     return stack;

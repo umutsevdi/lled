@@ -5,14 +5,14 @@
 
 int main(int argc, char* argv[])
 {
-    lua::Runtime& l = lua::Runtime::instance();
+    lled::Lua& l = lled::Lua::instance();
     std::cout << l << std::endl;
     std::cout << "alive ";
     for (int i = 0; i < argc; i++) {
         std::cout << argv[i];
     }
     std::cout << std::endl;
-    std::thread t([]() { gl::setup(); });
+    std::thread t([]() { lled::setup(); });
     l.shell();
     return 0;
 }

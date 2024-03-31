@@ -1,15 +1,12 @@
 #include "wm/display.h"
+#include "wm/editor.h"
+#include <iostream>
 
-#define GL_SILENCE_DEPRECATION
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-#include <GLES2/gl2.h>
-#endif
-#include <GLFW/glfw3.h>// Will drag system OpenGL headers
-                       //
-
-void gl::setup()
+void lled::setup()
 {
-    auto& instance = gl::WindowManager::instance();
-    instance.instance().instance().instance();
+    auto& instance = lled::WindowManager::instance();
+    auto& editor = lled::Editor::instance();
+    instance.instance();
+    editor.instance();
     std::cout << "Hello gl";
 }

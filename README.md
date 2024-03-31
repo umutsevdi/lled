@@ -1,2 +1,2 @@
-# revdb
-Hook based database that can run Lua as interface language
+# lled
+A Lightweight Lua editor written with ImGUI that can modify itself at runtime.

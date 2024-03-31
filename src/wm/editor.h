@@ -1,6 +1,6 @@
 /******************************************************************************
 
- * File: wm/display.h
+ * File: wm/editor.h
  *
  * Author: Umut Sevdi
  * Created: 03/31/24
@@ -8,21 +8,23 @@
 
 *****************************************************************************/
 
+#include "runtime/lua.h"
 namespace lled
 {
-bool is_ready();
-
-void setup();
-
-class WindowManager {
+class Editor {
    public:
-    static WindowManager& instance();
-    WindowManager& operator=(WindowManager&&) = default;
-    WindowManager& operator=(const WindowManager&) = default;
+    static Editor& instance();
+    void context();
+
+    Editor& operator=(Editor&&) = default;
+    Editor& operator=(const Editor&) = default;
 
    private:
-    WindowManager();
-    ~WindowManager();
+    Editor();
+    ~Editor();
+
+    char buffer[2048];
+    lled::Status result = {};
 };
 
 }// namespace lled

@@ -1,7 +1,4 @@
-#include "wm/editor.h"
-#include "imgui.h"
-#include "runtime/lua.h"
-#include "wm/display.h"
+#include "wm/Editor.h"
 
 int _text_input_cb(ImGuiInputTextCallbackData* data)
 {
@@ -23,24 +20,8 @@ int _text_input_cb(ImGuiInputTextCallbackData* data)
     return 0;
 }
 
-lled::Editor::Editor()
+void lled::Editor::menu_bar_function()
 {
-    if (!lled::is_ready()) { throw "Illegal State"; }
-}
-
-lled::Editor::~Editor() {}
-
-lled::Editor& lled::Editor::instance()
-{
-    static Editor instance;
-    return instance;
-}
-
-void lled::Editor::context()
-{
-    ImGui::Begin("Text Editor", nullptr,
-                 ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoNav);
-    ImGui::BeginMenuBar();
     if (ImGui::BeginMenu("File")) {
         ImGui::MenuItem("Open");
         ImGui::MenuItem("Save");
@@ -64,11 +45,13 @@ void lled::Editor::context()
         result = lua.exec(ctx, true);
         selection = {false, 0, 0};
     }
-    ImGui::EndMenuBar();
+}
+
+void lled::Editor::body()
+{
     ImGui::TextColored(
-        ImVec4(128.0, 128.0, 128.0, 255.0), "selected: %s %zu %zu %s",
-        selection.active ? "true" : "false", selection.begin, selection.end,
-        std::string(buffer).substr(selection.begin, selection.end).c_str());
+        ImVec4(128.0, 128.0, 128.0, 255.0), "selected: %s %zu %zu",
+        selection.active ? "true" : "false", selection.begin, selection.end);
 
     ImGui::InputTextMultiline(
         "##text", buffer, 2048, ImVec2(ImGui::GetWindowSize().x, 250),
@@ -88,6 +71,4 @@ void lled::Editor::context()
         }
         ImGui::EndPopup();
     }
-
-    ImGui::End();
 }

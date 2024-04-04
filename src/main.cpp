@@ -1,7 +1,16 @@
 #include "runtime/lua.h"
+#include "wm/Editor.h"
 #include "wm/display.h"
 #include <iostream>
 #include <thread>
+
+void setup()
+{
+    auto& instance = lled::WindowManager::instance();
+    lled::Editor editor;
+    instance.loop([&]() { editor.context(); });
+    std::cout << "Hello gl";
+}
 
 int main(int argc, char* argv[])
 {
@@ -12,7 +21,7 @@ int main(int argc, char* argv[])
         std::cout << argv[i];
     }
     std::cout << std::endl;
-    std::thread t([]() { lled::setup(); });
+    std::thread t([]() { setup(); });
     l.shell();
     return 0;
 }

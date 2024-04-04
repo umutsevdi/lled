@@ -4,6 +4,8 @@ add_subdirectory(runtime)
 add_subdirectory(wm)
 
 include_directories(./)
+include_directories(../imgui/)
+include_directories(../imgui/backends/)
 
 add_executable(revdb ${SOURCES})
 # pull in common dependencies

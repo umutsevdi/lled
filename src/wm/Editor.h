@@ -1,3 +1,4 @@
+#pragma once
 /******************************************************************************
 
  * File: wm/editor.h
@@ -9,15 +10,16 @@
 *****************************************************************************/
 
 #include "runtime/lua.h"
+#include "wm/Window.h"
 namespace lled
 {
-class Editor {
+class Editor : public Window {
    public:
-    static Editor& instance();
-    void context();
+    Editor() : Window("Text Editor", ImGuiWindowFlags_NoNav, true) {}
 
-    Editor& operator=(Editor&&) = default;
-    Editor& operator=(const Editor&) = default;
+    Editor(const Editor&) = delete;
+    Editor(Editor&&) = delete;
+    ~Editor(){};
 
     struct {
         bool active;
@@ -25,10 +27,10 @@ class Editor {
         size_t end;
     } selection;
 
-   private:
-    Editor();
-    ~Editor();
+    void menu_bar_function() override;
+    void body() override;
 
+   private:
     char buffer[2048];
     bool show_output = true;
     lled::Status result = {};

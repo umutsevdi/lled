@@ -1,6 +1,5 @@
 #include "runtime/lua.h"
 #include <numeric>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -11,7 +10,7 @@ extern "C" {
 }
 
 lua_State* _state;
-std::stringstream _output;
+std::stringstream* _strstream;
 
 int _io_write(lua_State* L)
 {
@@ -20,8 +19,7 @@ int _io_write(lua_State* L)
         const char* s = luaL_checkstring(L, i);
         if (s == NULL)
             return luaL_error(L, "argument to 'output' must be a string");
-        _output << s << std::endl;
-        printf("%s", s);// Print argument
+        if (_strstream != nullptr) *_strstream << s;
     }
 
     return 0;
@@ -31,12 +29,11 @@ int _print(lua_State* L)
 {
     int n = lua_gettop(L);
     for (int i = 1; i <= n; i++) {
-        const char* s = luaL_checkstring(L, i);
-        if (s == NULL)
-            return luaL_error(L, "argument to 'output' must be a string");
-        _output << s << std::endl;
-        printf("%s\n", s);// Print argument
+        const char* s = luaL_tolstring(L, i, NULL);
+        if (_strstream != nullptr) *_strstream << s << "\t";
+        lua_pop(L, 1);
     }
+    if (_strstream != nullptr) *_strstream << std::endl;
 
     return 0;
 }
@@ -47,8 +44,6 @@ void override_io_write()
     lua_pushcfunction(_state, _io_write);
     lua_setfield(_state, -2, "write");
     lua_register(_state, "print", _print);
-
-    luaL_dostring(_state, "io.write('Lua runtime is enabled')");
     luaL_dostring(_state, "print('Lua runtime is enabled')");
 }
 
@@ -80,7 +75,7 @@ lled::Lua& lled::Lua::instance()
 
 int lled::Lua::version() { return lua_version(_state); }
 
-void lled::Lua::shell()
+void lled::Shell::shell()
 {
     int syntax_stack = 0;
     std::string line;
@@ -98,9 +93,9 @@ void lled::Lua::shell()
             syntax_stack += _count_stack(line);
         }
         if (!syntax_stack) {
-            Status s = exec(buffer, true);
+            Status s = exec(buffer);
             if (!s.ok) {
-                std::cerr << s.msg << std::endl;
+                std::cerr << "Error: " << s.msg << std::endl;
             } else {
                 std::cout << s.msg << std::endl;
             }
@@ -110,26 +105,29 @@ void lled::Lua::shell()
     std::cout << "Lua runtime exited" << std::endl;
 }
 
-lled::Status lled::Lua::exec(std::string& statement, bool log)
+lled::Status lled::Shell::exec(std::string_view statement)
 {
-    int err = luaL_loadbuffer(_state, statement.c_str(), statement.length(), "")
+    while (this->lua.lock) {}
+    this->lua.lock = true;
+    _strstream = &this->_output;
+    int err = luaL_loadbuffer(_state, statement.data(), statement.length(), "")
               || lua_pcall(_state, 0, 0, 0);
     if (err) {
         std::string code = lua_tostring(_state, -1);
         lua_pop(_state, 1);
-        if (log) { std::cerr << code << std::endl; }
+        this->lua.lock = false;
         return lled::Status(err, code);
     }
-    std::string output = _output.str();
+    Status s(0, this->_output.str());
     _output.flush();
-    return Status(0, output);
+    this->lua.lock = false;
+    return s;
 }
 
-lled::Status lled::Lua::exec(std::vector<std::string>& statement, bool log)
+lled::Status lled::Shell::exec(std::vector<std::string>& statement)
 {
-    std::string st =
-        std::accumulate(statement.begin(), statement.end(), std::string());
-    return exec(st, log);
+    return exec(
+        std::accumulate(statement.begin(), statement.end(), std::string()));
 }
 
 int _count(const std::string& line, const std::string& needle)

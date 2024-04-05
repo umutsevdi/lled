@@ -1,4 +1,5 @@
 #include "wm/Editor.h"
+#include <string_view>
 
 int _text_input_cb(ImGuiInputTextCallbackData* data)
 {
@@ -16,6 +17,7 @@ int _text_input_cb(ImGuiInputTextCallbackData* data)
     } else {
         editor->selection = {.active = false};
     }
+    editor->cursor.idx = data->CursorPos;
 
     return 0;
 }
@@ -37,24 +39,27 @@ void lled::Editor::menu_bar_function()
     ImGui::MenuItem("Menue");
 
     if (ImGui::MenuItem("Execute")) {
-        auto& lua = Lua::instance();
-        auto ctx = std::string(buffer);
+
+        auto ctx = std::string_view(this->get_buffer());
         if (this->selection.active) {
             ctx = ctx.substr(selection.begin, selection.end);
         }
-        result = lua.exec(ctx, true);
+        result = shell.exec(ctx);
         selection = {false, 0, 0};
     }
 }
 
 void lled::Editor::body()
 {
-    ImGui::TextColored(
-        ImVec4(128.0, 128.0, 128.0, 255.0), "selected: %s %zu %zu",
-        selection.active ? "true" : "false", selection.begin, selection.end);
+    ImGui::TextColored(ImVec4(128.0, 128.0, 128.0, 255.0),
+                       "r:%zu | c:%zu | %zu/%zu selected: %s %zu %zu",
+                       this->cursor.row, this->cursor.col, this->cursor.idx,
+                       get_buffer_s(), selection.active ? "true" : "false",
+                       selection.begin, selection.end);
 
     ImGui::InputTextMultiline(
-        "##text", buffer, 2048, ImVec2(ImGui::GetWindowSize().x, 250),
+        "##text", this->get_buffer(), this->get_buffer_s(),
+        ImVec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y - 100),
         ImGuiInputTextFlags_CallbackAlways, _text_input_cb, this);
     if (show_output) {
         ImGui::TextColored(ImVec4(128, 200, 0, 255), "%s", result.msg.c_str());

@@ -1,5 +1,6 @@
-#include "wm/display.h"
+#include "wm/Display.h"
 
+#include <functional>
 #include <iostream>
 #define GL_SILENCE_DEPRECATION
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -11,21 +12,21 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-bool ctx_loaded = false;
 GLFWwindow* window;
 std::string glsl_version;
-
-bool lled_is_ready() { return ctx_loaded; }
 
 static void glfw_error_callback(int error, const char* description)
 {
     std::cerr << "GLFW Error Code: " << error << ", Message: " << description;
 }
 
-int _initialize_backend()
+bool _initialize_backend()
 {
+    static bool ready = false;
+    if (ready) { return true; }
+    ready = true;
     glfwSetErrorCallback(glfw_error_callback);
-    if (!glfwInit()) return 1;
+    if (!glfwInit()) throw std::runtime_error("GLFW Initialization Failed");
 
         // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -39,7 +40,8 @@ int _initialize_backend()
     glsl_version = "#version 150";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);// 3.2+ only
+    glfwWindowHint(GLFW_OPENGL_PROFILE,
+                   GLFW_OPENGL_CORE_PROFILE);           // 3.2+ only
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);// Required on Mac
 #else
     // GL 3.0 + GLSL 130
@@ -49,16 +51,20 @@ int _initialize_backend()
     // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);// 3.2+ only
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);// 3.0+ only
 #endif
-    ctx_loaded = true;
-    return 0;
+    return ready;
 }
 
-lled::WindowManager::WindowManager()
+bool lled::is_ready() { return _initialize_backend(); }
+
+lled::WindowManager::WindowManager(std::string _wm_name, int width, int height)
+    : wm_name(_wm_name)
 {
-    if (!ctx_loaded) { _initialize_backend(); }
+    _initialize_backend();
     // Create window with graphics context
-    window = glfwCreateWindow(960, 720, "lled", nullptr, nullptr);
-    if (window == nullptr) { throw "GLFW couldn't create window"; }
+    window = glfwCreateWindow(width, height, wm_name.c_str(), nullptr, nullptr);
+    if (window == nullptr) {
+        throw std::runtime_error("GLFW Window Creation Failure");
+    }
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);// Enable vsync
                         //  // Setup Dear ImGui context
@@ -81,44 +87,15 @@ lled::WindowManager::WindowManager()
 
 void lled::WindowManager::loop(std::function<void(void)> fn)
 {
-    bool show_demo_window = true;
-    bool show_another_window = true;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    int display_w, display_h;
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
-        // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        if (show_demo_window) {
-            static int counter = 0;
-            ImGui::Begin("Hello, world!");
-            ImGui::Checkbox("Another Window", &show_another_window);
-            ImGui::ColorEdit3("clear color", (float*)&clear_color);
-            if (ImGui::Button("Button")) { counter++; }
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-            ImGui::End();
-        }
-
-        bool my_window = true;
-        ImGui::Begin("My Window", &my_window);
-        ImGui::Text("Hello");
-        static int item = 0;
-        if (ImGui::Combo("Combo", &item, "Test\0Test2\0Test3\0", -1)) {
-            std::cout << item << " is selected" << std::endl;
-        }
-        ImGui::End();
-        if (show_another_window) {
-            ImGui::Begin("Another Window", &show_another_window);
-            ImGui::Text("Hello from another window!");
-            if (ImGui::Button("Close Me")) show_another_window = false;
-            ImGui::End();
-        }
         fn();
-        // Rendering
         ImGui::Render();
-        int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color.x * clear_color.w,
@@ -140,9 +117,9 @@ lled::WindowManager::~WindowManager()
     glfwDestroyWindow(window);
     glfwTerminate();
 }
+
 lled::WindowManager& lled::WindowManager::instance()
 {
-    static WindowManager instance;
+    static WindowManager instance("lled");
     return instance;
 }
-

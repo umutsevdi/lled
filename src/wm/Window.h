@@ -1,9 +1,8 @@
 #pragma once
 #include <string>
 
-extern bool lled_is_ready();
-
 #include "imgui.h"
+#include "wm/Display.h"
 namespace lled
 {
 
@@ -12,7 +11,7 @@ class Window {
     Window(std::string _name, int _flag, bool _menu_bar)
         : menu_bar(_menu_bar), name(_name), flag(_flag)
     {
-        if (!lled_is_ready()) { throw "Illegal State"; }
+        if (!lled::is_ready()) { throw "Illegal State"; }
         if (this->menu_bar) { this->flag |= ImGuiWindowFlags_MenuBar; }
     }
     virtual ~Window();

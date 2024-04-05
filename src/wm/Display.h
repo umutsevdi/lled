@@ -9,11 +9,13 @@
 
 *****************************************************************************/
 
-bool lled_is_ready();
 #include <functional>
+#include <string>
 
 namespace lled
 {
+
+bool is_ready();
 
 class WindowManager {
    public:
@@ -24,8 +26,10 @@ class WindowManager {
     void loop(std::function<void(void)> fn);
 
    private:
-    WindowManager();
+    WindowManager(std::string _wm_name, int width = 960, int height = 720);
     ~WindowManager();
+
+    std::string wm_name;
 };
 
 }// namespace lled

@@ -37,20 +37,32 @@ class Status {
 class Lua {
    public:
     static Lua& instance();
-
-    /* Creates an interactive shell until "quit" or "exit" is called */
-    void shell();
-
     /* Returns the Lua version */
     int version();
 
+    Lua& operator=(Lua&&) = default;
+    Lua& operator=(const Lua&) = delete;
+    bool lock = false;
+
+   private:
+    Lua();
+    ~Lua();
+};
+
+class Shell {
+   public:
+    Shell() : lua(Lua::instance()) {}
+    ~Shell() {}
+
+    /* Creates an interactive shell until "quit" or "exit" is called */
+    void shell();
     /**
      * Executes the given statement returns an error code if there is any
      * @statement - to execute
      * @log - whether to print error messages to stderr
      * @return error code
      */
-    Status exec(std::string& statement, bool log = false);
+    Status exec(std::string_view statement);
 
     /**
      * Executes the given list of statements and returns an error code if there
@@ -59,18 +71,13 @@ class Lua {
      * @log - whether to print error messages to stderr
      * @return error code
      */
-    Status exec(std::vector<std::string>& statement, bool log = false);
+    Status exec(std::vector<std::string>& statement);
 
-    Lua& operator=(Lua&&) = default;
-    Lua& operator=(const Lua&) = delete;
-    friend std::ostream& operator<<(std::ostream& s, const Lua& l)
-    {
-        s << "Lua " << l.instance().version();
-        return s;
-    }
+    Shell& operator=(Shell&&) = delete;
+    Shell& operator=(const Shell&) = delete;
 
    private:
-    Lua();
-    ~Lua();
+    Lua& lua;
+    std::stringstream _output;
 };
 }// namespace lled

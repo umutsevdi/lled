@@ -1,5 +1,6 @@
 file(GLOB SOURCES main.cpp)
 
+add_subdirectory(common)
 add_subdirectory(runtime)
 add_subdirectory(wm)
 
@@ -12,5 +13,6 @@ add_executable(revdb ${SOURCES})
 target_link_libraries(revdb
     runtime
     wm
+
 )
 

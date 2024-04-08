@@ -1,7 +1,7 @@
 #include "runtime/lua.h"
+#include <iostream>
 #include <numeric>
 #include <string>
-#include <vector>
 
 extern "C" {
 #include <lauxlib.h>
@@ -9,7 +9,9 @@ extern "C" {
 #include <lualib.h>
 }
 
+/* Internal Lua state */
 lua_State* _state;
+/* Address of the current string stream */
 std::stringstream* _strstream;
 
 int _io_write(lua_State* L)
@@ -47,16 +49,13 @@ void override_io_write()
     luaL_dostring(_state, "print('Lua runtime is enabled')");
 }
 
-/* Returns the number of occurrences of the needle within the line */
-int _count(const std::string& line, const std::string& needle);
-
 /**
  * Calculates the absolute indentation by counting tokens within the given line,
  * returns it.
  * @line - to count
  * @return - indentation count
  */
-int _count_stack(std::string& line);
+inline int _count_stack(std::string& line);
 
 lled::Lua::Lua()
 {
@@ -94,7 +93,7 @@ void lled::Shell::shell()
         }
         if (!syntax_stack) {
             Status s = exec(buffer);
-            if (!s.ok) {
+            if (!s.is_ok()) {
                 std::cerr << "Error: " << s.msg << std::endl;
             } else {
                 std::cout << s.msg << std::endl;
@@ -102,12 +101,12 @@ void lled::Shell::shell()
             buffer.clear();
         }
     }
-    std::cout << "Lua runtime exited" << std::endl;
 }
 
 lled::Status lled::Shell::exec(std::string_view statement)
 {
     while (this->lua.lock) {}
+    _output.str("");
     this->lua.lock = true;
     _strstream = &this->_output;
     int err = luaL_loadbuffer(_state, statement.data(), statement.length(), "")
@@ -116,12 +115,10 @@ lled::Status lled::Shell::exec(std::string_view statement)
         std::string code = lua_tostring(_state, -1);
         lua_pop(_state, 1);
         this->lua.lock = false;
-        return lled::Status(err, code);
+        return lled::Status::ERROR(code);
     }
-    Status s(0, this->_output.str());
-    _output.flush();
     this->lua.lock = false;
-    return s;
+    return Status::OK(this->_output.str());
 }
 
 lled::Status lled::Shell::exec(std::vector<std::string>& statement)
@@ -130,7 +127,8 @@ lled::Status lled::Shell::exec(std::vector<std::string>& statement)
         std::accumulate(statement.begin(), statement.end(), std::string()));
 }
 
-int _count(const std::string& line, const std::string& needle)
+/* Returns the number of occurrences of the needle within the line */
+static inline int _count(const std::string& line, const std::string& needle)
 {
     int n = 0;
     std::string ::size_type pos = 0;
@@ -141,12 +139,11 @@ int _count(const std::string& line, const std::string& needle)
     return n;
 }
 
-int _count_stack(std::string& line)
+inline int _count_stack(std::string& line)
 {
-    int stack = _count(line, "function");// do is a block indentation in Lua
-    stack += _count(line, "do");         // do is a block indentation in Lua
-    stack += _count(line, "then");       // then is a block indentation in Lua
-    stack -= _count(line, "elseif");// except for when then is used with elseif
-    stack -= _count(line, "end");   // end closes blocks in Lua
-    return stack;
+    return _count(line, "function")// do is a block indentation in Lua
+           + _count(line, "do")    // do is a block indentation in Lua
+           + _count(line, "then")  // then is a block indentation in Lua
+           - _count(line, "elseif")// except for when then is used with elseif
+           - _count(line, "end");  // end closes blocks in Lua
 }

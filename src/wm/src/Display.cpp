@@ -83,6 +83,11 @@ lled::WindowManager::WindowManager(std::string _wm_name, int width, int height)
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version.c_str());
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.WindowPadding = ImVec2(8, 8);
+    style.FramePadding = ImVec2(4, 4);
+    style.FrameRounding = 4.0f;
+    style.FrameBorderSize = 1.0f;
 }
 
 void lled::WindowManager::loop(std::function<void(void)> fn)

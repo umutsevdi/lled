@@ -9,30 +9,11 @@
  * Description: This header for language utils
 
 *****************************************************************************/
-#include <iostream>
+#include "common/Status.h"
 #include <sstream>
 #include <vector>
 namespace lled
 {
-
-class Status {
-   public:
-    Status() : code(0), ok(true) {}
-    Status(int _code, std::string _msg)
-        : code(_code), msg(_msg), ok(_code == 0){};
-    ~Status() = default;
-
-    Status& operator=(const Status& s)
-    {
-        code = s.code;
-        msg = s.msg;
-        ok = s.ok;
-        return *this;
-    }
-    int code;
-    std::string msg;
-    bool ok;
-};
 
 class Lua {
    public:

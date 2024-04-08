@@ -1,14 +1,19 @@
 #include "runtime/lua.h"
 #include "wm/Display.h"
 #include "wm/Editor.h"
+#include "wm/LuaEditor.h"
 #include <iostream>
 #include <thread>
 
 void setup()
 {
     auto& wm = lled::WindowManager::instance();
-    lled::Editor editor;
-    wm.loop([&]() { editor.context(); });
+    lled::LuaEditor editor;
+    lled::TextEditor feditor;
+    wm.loop([&]() {
+        feditor.context();
+        editor.context();
+    });
 }
 
 int main(int argc, char* argv[])

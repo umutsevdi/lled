@@ -9,4 +9,8 @@
 ../imgui/
 -I
 ../imgui/backends/
+-I
+../tinyfiledialogs-code/
+-I
+../tinyfiledialogs-code/more_dialogs/
 -lua

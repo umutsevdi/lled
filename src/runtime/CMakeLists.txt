@@ -4,4 +4,5 @@ include_directories(../../lua/)
 add_library(runtime ${RUNTIME_RES})
 target_link_libraries(runtime
     lua
+    common
 )

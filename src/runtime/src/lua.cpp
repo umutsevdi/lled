@@ -139,11 +139,12 @@ static inline int _count(const std::string& line, const std::string& needle)
     return n;
 }
 
+/**
+ * "function", "do" are block indentation in Lua
+ * "then" is a block indentation except when used with "elseif"
+ * "end" closes existing block */
 inline int _count_stack(std::string& line)
 {
-    return _count(line, "function")// do is a block indentation in Lua
-           + _count(line, "do")    // do is a block indentation in Lua
-           + _count(line, "then")  // then is a block indentation in Lua
-           - _count(line, "elseif")// except for when then is used with elseif
-           - _count(line, "end");  // end closes blocks in Lua
+    return _count(line, "function") + _count(line, "do") + _count(line, "then")
+           - _count(line, "elseif") - _count(line, "end");
 }

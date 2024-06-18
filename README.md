@@ -9,7 +9,8 @@ LLED is a text editor and a Lua interpreter.
 * All processes share the same Lua runtime meaning different files can pass each other variables or functions.
 * LLED also provides a terminal shell to the runtime, through the terminal.
 
-``sh
+```sh
 sudo apt install libglfw3 libglfw3-dev
-``
+```
+
 ![Window Manager Example](/screenshots/wm.png)

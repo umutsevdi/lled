@@ -8,9 +8,9 @@ include_directories(./)
 include_directories(../imgui/)
 include_directories(../imgui/backends/)
 
-add_executable(revdb ${SOURCES})
+add_executable(lled ${SOURCES})
 # pull in common dependencies
-target_link_libraries(revdb
+target_link_libraries(lled
     runtime
     wm
 

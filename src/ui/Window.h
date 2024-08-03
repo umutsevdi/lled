@@ -1,9 +1,9 @@
 #pragma once
 #include <string>
 
-#include "common/Status.h"
 #include "imgui.h"
-#include "wm/Display.h"
+#include "common/Status.h"
+#include "ui/Display.h"
 namespace lled
 {
 static const float IMGUI_FONT_SIZE_X = 3.5;

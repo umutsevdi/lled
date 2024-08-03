@@ -1,0 +1,13 @@
+-xc++-header
+-Wall
+-Wextra
+-I
+./src/
+-I
+external/imgui/
+-I
+external/tinyfiledialogs/
+-I
+external/lua/
+-I
+-lua

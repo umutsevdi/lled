@@ -7,3 +7,12 @@
 [submodule "tinyfiledialogs-code"]
 	path = tinyfiledialogs-code
 	url = https://git.code.sf.net/p/tinyfiledialogs/code
+[submodule "external/tinyfiledialogs"]
+	path = external/tinyfiledialogs
+	url = https://github.com/LazyJazz/tinyfiledialogs.git
+[submodule "external/lua"]
+	path = external/lua
+	url = https://github.com/lua/lua.git
+[submodule "external/imgui"]
+	path = external/imgui
+	url = https://github.com/ocornut/imgui.git

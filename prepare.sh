@@ -1,22 +1,32 @@
-#!/bin/sh
+#!/usr/bin/env sh
+STOP=
 
-if [ -z "$(apt-get search libglfw3-dev | grep 'installed')" ]; then
-    sudo apt-get install libglfw3-dev
+if ! dpkg -l | grep -q '^ii  libglfw3-dev'; then
+    sudo apt-get install -y libglfw3-dev
 fi
 
-if [ ! -f "lua/onelua.c" ]; then
+if [ ! -f "external/lua/onelua.c" ]; then
     echo "Lua submodule is missing!"
     exit 1
 fi
 
-cat >lua/CMakeLists.txt << EOF
+cat >external/lua/CMakeLists.txt << EOF
 file(GLOB LUA_SRC onelua.c)
-add_library(lua \${LUA_SRC})
-include_directories(./)
+add_library(lua ${LUA_SRC})
+
+target_include_directories(lua PRIVATE ./)
+target_compile_options(lua PRIVATE
+    -Wall -O2 -Wextra
+    -std=c99
+    -ldl -lreadline
+    -fno-stack-protector
+    -fno-common
+    -march=native
+)
 EOF
 
 
-cat >imgui/CMakeLists.txt << EOF
+cat >external/imgui/CMakeLists.txt << EOF
 file(GLOB IMGUI_RES ./*.cpp
 ./backends/imgui_impl_glfw.cpp
 ./backends/imgui_impl_opengl3.cpp)
@@ -48,7 +58,7 @@ endif()
 EOF
 
 
-cat >tinyfiledialogs-code/CMakeLists.txt <<EOF
+cat >external/tinyfiledialogs/CMakeLists.txt <<EOF
 file(GLOB TFD_RES 
 tinyfiledialogs.c
 more_dialogs/tinyfd_moredialogs.c
@@ -59,6 +69,6 @@ include_directories(./more_dialogs)
 EOF
 
 echo "CMakeLists.txt files have been generated. Now comment out the main function in the lua.c"
-echo "Press any key to open the text editor"
-read x
-${VISUAL-${EDITOR-nano}} lua/lua.c
+echo "Press any key to open the text editor $STOP"
+read STOP
+${VISUAL-${EDITOR-nano}} external/lua/lua.c

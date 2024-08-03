@@ -6,16 +6,12 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 add_compile_options(-ggdb -D_DEBUG)
 
-add_subdirectory(lua)
-add_subdirectory(imgui)
-add_subdirectory(tinyfiledialogs-code)
+add_subdirectory(external)
 add_subdirectory(src)
 add_compile_options(-Wall
         -O3
         -Wextra
-        -Wno-format          # int != int32_t as far as the compiler is concerned because gcc has int32_t as long int
-        -Wno-unused-function # we have some for the docs that aren't called
-        )
+)
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     add_compile_options(-Wno-maybe-uninitialized)
 endif()

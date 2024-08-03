@@ -1,4 +1,4 @@
-#include "wm/LuaEditor.h"
+#include "ui/LuaEditor.h"
 
 void lled::LuaEditor::menu_bar_function()
 {

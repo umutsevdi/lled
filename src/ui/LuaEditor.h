@@ -10,7 +10,7 @@
 *****************************************************************************/
 
 #include "runtime/lua.h"
-#include "wm/Editor.h"
+#include "ui/Editor.h"
 namespace lled
 {
 class LuaEditor : public TextEditor {

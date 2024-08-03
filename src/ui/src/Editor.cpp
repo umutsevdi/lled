@@ -1,4 +1,4 @@
-#include "wm/Editor.h"
+#include "ui/Editor.h"
 #include "common/Status.h"
 #include "imgui.h"
 #include "tinyfiledialogs.h"

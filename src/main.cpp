@@ -1,31 +1,34 @@
 #include "runtime/lua.h"
-#include "wm/Display.h"
-#include "wm/Editor.h"
-#include "wm/LuaEditor.h"
+#include "ui/Display.h"
+#include "ui/Editor.h"
+#include "ui/LuaEditor.h"
+#include <csignal>
 #include <iostream>
 #include <thread>
 
-void setup()
+void _init()
 {
     lled::Lua::start();
-    auto& wm = lled::WindowManager::instance();
-    lled::LuaEditor editor;
-    lled::TextEditor feditor;
-    wm.loop([&]() {
-        feditor.context();
-        editor.context();
+    signal(SIGINT, [](int) -> void {
+        lled::Lua::end();
+        lled::wm::close();
     });
 }
 
 int main(int argc, char* argv[])
 {
+    _init();
     lled::Shell io;
-    std::cout << "alive ";
-    for (int i = 0; i < argc; i++) {
-        std::cout << argv[i];
-    }
-    std::cout << std::endl;
-    std::thread t([]() { setup(); });
+    std::thread t([]() {
+        lled::wm::init();
+        lled::LuaEditor editor;
+        lled::TextEditor feditor;
+        lled::wm::loop([&]() {
+            feditor.context();
+            editor.context();
+        });
+        lled::wm::close();
+    });
     io.shell();
     lled::Lua::end();
     return 0;

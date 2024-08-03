@@ -12,11 +12,11 @@ fi
 
 cat >external/lua/CMakeLists.txt << EOF
 file(GLOB LUA_SRC onelua.c)
-add_library(lua ${LUA_SRC})
+add_library(lua \${LUA_SRC})
 
 target_include_directories(lua PRIVATE ./)
 target_compile_options(lua PRIVATE
-    -Wall -O2 -Wextra
+    -Wall -O2
     -std=c99
     -ldl -lreadline
     -fno-stack-protector

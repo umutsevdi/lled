@@ -53,13 +53,13 @@ class Window {
     /* Draws the window interface */
     virtual void body() = 0;
     void window_error(std::string error_name);
-    void window_error(std::string error_name, Status* status);
+    void window_error(std::string error_name, Result* status);
 
     bool menu_bar;
     std::string name;
     int flag;
     bool enabled = true;
-    Status result = Status::OK();
+    Result result = Result::OK();
 };
 
 }// namespace lled

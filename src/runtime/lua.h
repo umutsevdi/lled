@@ -15,24 +15,17 @@
 namespace lled
 {
 
-class Lua {
-   public:
-    static Lua& instance();
-    /* Returns the Lua version */
-    int version();
+namespace Lua
+{
+void start();
+void end();
+int version();
 
-    Lua& operator=(Lua&&) = default;
-    Lua& operator=(const Lua&) = delete;
-    bool lock = false;
-
-   private:
-    Lua();
-    ~Lua();
-};
+};// namespace Lua
 
 class Shell {
    public:
-    Shell() : lua(Lua::instance()) {}
+    Shell() {}
     ~Shell() {}
 
     /* Creates an interactive shell until "quit" or "exit" is called */
@@ -43,7 +36,7 @@ class Shell {
      * @log - whether to print error messages to stderr
      * @return error code
      */
-    Status exec(std::string_view statement);
+    Result exec(std::string_view statement);
 
     /**
      * Executes the given list of statements and returns an error code if there
@@ -52,13 +45,12 @@ class Shell {
      * @log - whether to print error messages to stderr
      * @return error code
      */
-    Status exec(std::vector<std::string>& statement);
+    Result exec(std::vector<std::string>& statement);
 
     Shell& operator=(Shell&&) = delete;
     Shell& operator=(const Shell&) = delete;
 
    private:
-    Lua& lua;
     std::stringstream _output;
 };
 }// namespace lled

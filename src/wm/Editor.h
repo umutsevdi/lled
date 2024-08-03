@@ -44,11 +44,11 @@ class TextEditor : public Window {
     void body() override;
 
     /* Opens a Open File Dialog and writes its contents to the buffer. */
-    Status open_file();
+    Result open_file();
     /* Updates an already opened file's contents. */
-    Status save_file();
+    Result save_file();
     /* Opens a Save File Dialog to choose a new file path and then runs save_file function. */
-    Status save_file_as();
+    Result save_file_as();
 
    protected:
     std::string base_name = "Text Editor";

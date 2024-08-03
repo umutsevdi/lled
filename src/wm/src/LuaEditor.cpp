@@ -16,7 +16,7 @@ void lled::LuaEditor::menu_bar_function()
     }
 }
 
-void msg_handler(lled::Status* status)
+void msg_handler(lled::Result* status)
 {
     if (ImGui::BeginPopup("Result")) {
         ImGui::TextColored(ImVec4(200, 200, 0, 255), "Result: %s",
@@ -24,7 +24,7 @@ void msg_handler(lled::Status* status)
         ImGui::Separator();
         if (ImGui::Button("Ok")) {
             ImGui::CloseCurrentPopup();
-            *status = lled::Status::OK();
+            *status = lled::Result::OK();
         }
         ImGui::EndPopup();
     }
@@ -33,6 +33,6 @@ void msg_handler(lled::Status* status)
 void lled::LuaEditor::body()
 {
     TextEditor::body();
-    if (result.is_ok() && !result.msg.empty()) { ImGui::OpenPopup("Result"); }
+    if (result.ok && !result.msg.empty()) { ImGui::OpenPopup("Result"); }
     msg_handler(&this->result);
 }

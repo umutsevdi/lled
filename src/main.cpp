@@ -7,6 +7,7 @@
 
 void setup()
 {
+    lled::Lua::start();
     auto& wm = lled::WindowManager::instance();
     lled::LuaEditor editor;
     lled::TextEditor feditor;
@@ -26,5 +27,6 @@ int main(int argc, char* argv[])
     std::cout << std::endl;
     std::thread t([]() { setup(); });
     io.shell();
+    lled::Lua::end();
     return 0;
 }

@@ -6,15 +6,15 @@
 #include <fstream>
 #include <iostream>
 
-lled::Status lled::TextEditor::open_file()
+lled::Result lled::TextEditor::open_file()
 {
     char* path = tinyfd_openFileDialog("Open File", "", 0, nullptr, "", false);
     // open_file is cancelled
-    if (path == nullptr) { return Status::OK(); }
+    if (path == nullptr) { return Result::OK(); }
 
     std::ifstream file(path, std::ios::binary);
     if (!file.is_open()) {
-        return Status::ERROR("Failed to open the file at " + std::string(path));
+        return Result::ERROR("Failed to open the file at " + std::string(path));
     }
     file.seekg(0, std::ios::end);
     std::streampos size = file.tellg();
@@ -27,11 +27,11 @@ lled::Status lled::TextEditor::open_file()
     this->name = this->base_name + " | " + path;
 
     file.close();
-    return Status::OK();
+    return Result::OK();
 }
 
-lled::Status lled::TextEditor::save_file() { return lled::Status::OK(); }
-lled::Status lled::TextEditor::save_file_as() { return lled::Status::OK(); }
+lled::Result lled::TextEditor::save_file() { return lled::Result::OK(); }
+lled::Result lled::TextEditor::save_file_as() { return lled::Result::OK(); }
 
 int lled::TextEditor::text_input_cb(ImGuiInputTextCallbackData* data)
 {
@@ -71,7 +71,7 @@ void lled::TextEditor::menu_bar_function()
             if (!this->saved) {
                 if (this->path == "") { save_file(); }
             }
-            if (Status s = open_file(); !s.is_ok()) { this->result = s; }
+            if (Result s = open_file(); !s.ok) { this->result = s; }
         }
 
         if (ImGui::MenuItem("Save")) {
@@ -151,6 +151,6 @@ void lled::TextEditor::body()
                            "Create a file using File>New or\n"
                            "open an existing file from File>Open.");
     }
-    if (!result.is_ok()) { ImGui::OpenPopup("Error"); }
+    if (!result.ok) { ImGui::OpenPopup("Error"); }
     this->window_error("Error", &this->result);
 }

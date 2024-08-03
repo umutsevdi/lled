@@ -14,16 +14,15 @@ void lled::Window::context()
     ImGui::End();
 }
 
-void lled::Window::window_error(std::string error_name, Status* status)
+void lled::Window::window_error(std::string error_name, Result* status)
 {
     if (ImGui::BeginPopup(error_name.c_str())) {
-        ImGui::Text("Code: %d", status->code);
         ImGui::TextColored(ImVec4(200, 0, 0, 255), "Error: %s",
                            status->msg.c_str());
         ImGui::Separator();
         if (ImGui::Button("Ok")) {
             ImGui::CloseCurrentPopup();
-            *status = Status::OK();
+            *status = Result::OK();
         }
         ImGui::EndPopup();
     }

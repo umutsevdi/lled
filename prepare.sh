@@ -16,8 +16,7 @@ add_library(lua \${LUA_SRC})
 
 target_include_directories(lua PRIVATE ./)
 target_compile_options(lua PRIVATE
-    -Wall -O2
-    -std=c99
+    -O3
     -ldl -lreadline
     -fno-stack-protector
     -fno-common

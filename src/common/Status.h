@@ -10,13 +10,18 @@
 *****************************************************************************/
 #include <complex>
 #include <string>
+#define MAX(a, b) (a) > (b) ? (a) : (b)
+#define MIN(a, b) (a) > (b) ? (b) : (a)
 
 namespace lled
 {
+
 inline constexpr size_t abs_dif(size_t a, size_t b)
 {
     return a > b ? a - b : b - a;
 }
+constexpr float IMGUI_FONT_SIZE_X = 3.5;
+constexpr float IMGUI_FONT_SIZE_Y = 13;
 
 class Result {
    public:

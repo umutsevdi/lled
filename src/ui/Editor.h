@@ -11,13 +11,14 @@
 
 #include "ui/Window.h"
 #include <vector>
+struct ImGuiInputTextCallbackData;
 namespace lled
+
 {
 class TextEditor : public Window {
    public:
     TextEditor(std::string _name = "Text Editor")
-        : Window(_name, ImGuiWindowFlags_None, true), base_name(_name),
-          buffer(0)
+        : Window(_name, 0, true), base_name(_name), buffer(0)
     {}
 
     TextEditor(const TextEditor&) = delete;
@@ -56,6 +57,8 @@ class TextEditor : public Window {
     bool saved = true;
     std::vector<char> buffer;
     static int text_input_cb(ImGuiInputTextCallbackData* data);
+    Result result = Result::OK();
+    bool show = false;
 
    private:
     /**

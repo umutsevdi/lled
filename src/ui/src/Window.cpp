@@ -1,6 +1,18 @@
 #include "ui/Window.h"
 #include "common/Status.h"
 
+#include <imgui.h>
+
+lled::Window::Window(std::string _name, int _flag, bool _menu_bar)
+    : menu_bar(_menu_bar), name(_name), flag(_flag)
+
+{
+    if (!lled::is_ready()) { throw "Illegal State"; }
+    if (this->menu_bar) { this->flag |= ImGuiWindowFlags_MenuBar; }
+}
+
+lled::Window::~Window() {}
+
 void lled::Window::context()
 {
     if (!this->enabled) { return; }
@@ -14,23 +26,8 @@ void lled::Window::context()
     ImGui::End();
 }
 
-void lled::Window::window_error(std::string error_name, Result* status)
+float lled::Window::w_end(bool axis, float object_size)
 {
-    if (ImGui::BeginPopup(error_name.c_str())) {
-        ImGui::TextColored(ImVec4(200, 0, 0, 255), "Error: %s",
-                           status->msg.c_str());
-        ImGui::Separator();
-        if (ImGui::Button("Ok")) {
-            ImGui::CloseCurrentPopup();
-            *status = Result::OK();
-        }
-        ImGui::EndPopup();
-    }
+    return (axis ? ImGui::GetWindowWidth() : ImGui::GetWindowHeight())
+           - object_size - 12;
 }
-
-void lled::Window::window_error(std::string error_name)
-{
-    window_error(error_name, &this->result);
-}
-
-lled::Window::~Window() {}

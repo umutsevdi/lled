@@ -4,7 +4,6 @@ add_subdirectory(common)
 add_subdirectory(runtime)
 add_subdirectory(ui)
 
-include_directories(../external/imgui)
 include_directories(./)
 
 add_executable(lled ${SOURCES})

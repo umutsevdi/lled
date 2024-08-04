@@ -2,9 +2,9 @@
 #include "common/Status.h"
 #include "imgui.h"
 #include "tinyfiledialogs.h"
+#include "ui/Dialogs.h"
 #include <cstdlib>
 #include <fstream>
-#include <iostream>
 
 lled::Result lled::TextEditor::open_file()
 {
@@ -71,7 +71,10 @@ void lled::TextEditor::menu_bar_function()
             if (!this->saved) {
                 if (this->path == "") { save_file(); }
             }
-            if (Result s = open_file(); !s.ok) { this->result = s; }
+            if (Result s = open_file(); !s.ok) {
+                this->show = true;
+                this->result = s;
+            }
         }
 
         if (ImGui::MenuItem("Save")) {
@@ -151,6 +154,6 @@ void lled::TextEditor::body()
                            "Create a file using File>New or\n"
                            "open an existing file from File>Open.");
     }
-    if (!result.ok) { ImGui::OpenPopup("Error"); }
-    this->window_error("Error", &this->result);
+    if (show && !result.ok) { ImGui::OpenPopup("Error"); }
+    popup_tooltip(result, show);
 }
